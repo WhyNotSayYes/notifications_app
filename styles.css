@@ -1,0 +1,243 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.app-container {
+    max-width: 600px;
+    margin: 50px auto;
+    text-align: center;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#reminder-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+#reminder-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    width: 90%;
+    max-width: 400px;
+    text-align: left;
+    position: relative;
+}
+
+.hidden {
+    display: none;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Стили для списка напоминаний */
+#reminder-items {
+    list-style: none;
+    padding: 0;
+}
+
+#reminder-items li {
+    background-color: #f9f9f9;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Оформление текста напоминания */
+#reminder-items li .reminder-details {
+    flex: 1;
+    padding-right: 20px; /* Добавим отступ перед кнопками */
+    text-align: left;
+}
+
+#reminder-items li .reminder-details .comment {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+#reminder-items li .reminder-details .time {
+    font-size: 14px;
+    color: #555;
+}
+
+#reminder-items li .reminder-details .time-left {
+    font-size: 12px;
+    color: #888;
+    margin-top: 4px;
+}
+
+#reminder-items li .reminder-details .disable-time {
+    font-size: 12px;
+    color: #007bff;  /* Синий цвет */
+    margin-top: 4px;
+}
+
+
+/* Кнопки редактирования и удаления */
+#reminder-items li button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin-left: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#reminder-items li button:hover {
+    background-color: #0056b3;
+}
+
+/* Popup Styles */
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    width: 90%;
+    max-width: 400px;
+    text-align: left;
+    position: relative;
+}
+
+.hidden {
+    display: none;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.close:hover {
+    color: #333;
+}
+
+#popup-title {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* Form Layout */
+.popup-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.popup-content input,
+.popup-content select {
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Button Style */
+#save-reminder {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+}
+
+#save-reminder:hover {
+    background-color: #0056b3;
+}
+
+/* Label and Input alignment */
+#popup .form-group label {
+    font-size: 14px;
+}
+
+#popup input[type="checkbox"] {
+    margin: 0;
+}
+
+#popup .form-group label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#popup .form-group {
+    margin-bottom: 15px; /* Расстояние между элементами */
+}
+
+#disable-time-checkbox {
+    order: 1; /* Перемещаем чекбокс после текста */
+    margin-left: 10px; /* Добавляем отступ между текстом и чекбоксом */
+}
+
+#checkbox-disable-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px; /* Отступ между чекбоксом и текстом */
+}

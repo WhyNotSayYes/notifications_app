@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reminder App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <h1>Reminder App</h1>
+        <button id="new-reminder-btn">New Reminder</button>
+
+        <div id="reminder-list">
+            <h2>Reminders</h2>
+            <ul id="reminder-items">
+                <!-- Reminders will be dynamically added here -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- Popup for adding/editing reminders -->
+    <div id="popup" class="popup hidden">
+        <div class="popup-content">
+            <span id="close-popup" class="close">&times;</span>
+            <h2 id="popup-title">New Reminder</h2>
+    
+            <!-- Обертка для поля комментария -->
+            <div class="form-group">
+                <label for="comment">Comment:</label>
+                <input type="text" id="comment" placeholder="Enter a comment" required>
+            </div>
+    
+            <!-- Обертка для поля даты и времени -->
+            <div class="form-group">
+                <label for="reminder-datetime">Date and Time:</label>
+                <input type="datetime-local" id="reminder-datetime" required>
+            </div>
+    
+            <!-- Обертка для поля частоты -->
+            <div class="form-group">
+                <label for="frequency">Frequency:</label>
+                <select id="frequency">
+                    <option value="60">Every 1 hour</option>
+                    <option value="120">Every 2 hours</option>
+                    <option value="custom">Custom</option>
+                </select>
+            </div>
+    
+            <!-- Обертка для кастомной частоты -->
+            <div id="custom-frequency" class="hidden form-group">
+                <label for="custom-minutes">Custom Frequency (minutes):</label>
+                <input type="number" id="custom-minutes" min="1" max="999">
+            </div>
+    
+            <!-- Обертка для чекбокса выключения -->
+            <div id="checkbox-disable-time" class="form-group">
+                    <label for="disable-time-checkbox">Disable at a specific time</label>
+                    <input type="checkbox" id="disable-time-checkbox">
+            </div>
+    
+            <!-- Обертка для поля с датой выключения -->
+            <div id="disable-datetime-container" class="hidden form-group">
+                <label for="disable-datetime">Disable Date and Time:</label>
+                <input type="datetime-local" id="disable-datetime">
+            </div>
+    
+            <!-- Кнопка сохранения -->
+            <button type="button" id="save-reminder">Save</button>
+        </div>
+    </div>
+    
+    <script type="module" src="script.js"></script>
+</body>
+</html>
