@@ -16,7 +16,7 @@ const firebaseConfig = {
 
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
-  const database = firebase.database(app);
+  const database = getDatabase(app);
 
 
 // Reminder class to manage reminders
