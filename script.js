@@ -2,7 +2,7 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+import { getDatabase, ref, set, onValue, push, update, remove } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBrBT42Yn4nmQ5EHzzZMLN4JJKiV4UbJD4",
@@ -31,7 +31,7 @@ class Reminder {
 }
 
 // Array to store reminders
-const reminders = [];
+// const reminders = [];
 
 // Selectors for popup and buttons
 const popup = document.getElementById("popup");
@@ -116,7 +116,19 @@ saveReminderBtn.addEventListener("click", () => {
     } else {
         // Создание нового напоминания
         const newReminder = new Reminder(comment, datetime, frequency, disableTime);
-        reminders.push(newReminder);
+        // reminders.push(newReminder); - turned off
+
+        //adding a notification to Firebase
+        const remindersRef = ref(database, 'reminders');
+
+        function addReminder(newReminder) {
+        push(remindersRef, newReminder)
+            .then(() => console.log("Напоминание добавлено."))
+            .catch((error) => console.error("Ошибка добавления:", error));
+        }
+        
+        addReminder(newReminder);
+
 
         // Запускаем его срабатывание
         scheduleReminder(newReminder);
