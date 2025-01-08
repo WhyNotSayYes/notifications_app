@@ -56,7 +56,7 @@ class Reminder {
 }
 
 // Array to store reminders
-// const reminders = []; - turned off
+const reminders = [];
 
 // Selectors for popup and buttons
 const popup = document.getElementById("popup");
