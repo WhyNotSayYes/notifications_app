@@ -39,7 +39,15 @@ function addReminder(reminder) {
   function deleteReminder(reminderId) {
     const reminderRef = ref(database, `reminders/${reminderId}`);
     remove(reminderRef)
-      .then(() => console.log('Reminder deleted.'))
+      .then(() => {
+        console.log('Reminder deleted.');
+        // Получаем напоминание из массива reminders по id
+        const reminder = reminders.find(r => r.id === reminderId);
+        if (reminder && reminder.timeoutId) {
+          clearTimeout(reminder.timeoutId); // Отменяем таймер
+          console.log('Reminder timer cleared.');
+        }
+      })
       .catch((error) => console.error('Error deleting reminder:', error));
   }
 
