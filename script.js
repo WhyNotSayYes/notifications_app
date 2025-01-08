@@ -19,6 +19,31 @@ const firebaseConfig = {
   const analytics = getAnalytics(app);
   const database = getDatabase(app);
 
+// Функция для добавления напоминания в Firebase
+function addReminder(reminder) {
+    const newReminderRef = push(ref(database, 'reminders'));
+    set(newReminderRef, reminder)
+      .then(() => console.log('Reminder added.'))
+      .catch((error) => console.error('Error adding reminder:', error));
+  }
+  
+  // Функция для обновления напоминания в Firebase
+  function updateReminder(reminder, reminderId) {
+    const reminderRef = ref(database, `reminders/${reminderId}`);
+    update(reminderRef, reminder)
+      .then(() => console.log('Reminder updated.'))
+      .catch((error) => console.error('Error updating reminder:', error));
+  }
+  
+  // Функция для удаления напоминания из Firebase
+  function deleteReminder(reminderId) {
+    const reminderRef = ref(database, `reminders/${reminderId}`);
+    remove(reminderRef)
+      .then(() => console.log('Reminder deleted.'))
+      .catch((error) => console.error('Error deleting reminder:', error));
+  }
+
+
 
 // Reminder class to manage reminders
 class Reminder {
@@ -31,7 +56,7 @@ class Reminder {
 }
 
 // Array to store reminders
-// const reminders = [];
+// const reminders = []; - turned off
 
 // Selectors for popup and buttons
 const popup = document.getElementById("popup");
@@ -102,39 +127,25 @@ saveReminderBtn.addEventListener("click", () => {
     if (!comment || !datetime) return alert("Please fill in all required fields.");
 
     if (editingReminder) {
-        // Очистка старого таймера
-        clearReminderTimers(editingReminder);
-
         // Обновление существующего напоминания
         editingReminder.comment = comment;
         editingReminder.datetime = new Date(datetime);
         editingReminder.frequency = frequency;
-        editingReminder.disableTime = disableTime ? new Date(disableTime) : null;
-
-        // Перезапуск напоминания
-        scheduleReminder(editingReminder);
+        editingReminder.disableTime = disableTime;
+    
+        // Отправка команды на обновление напоминания в Firebase
+        updateReminder(editingReminder, editingReminder.id);
     } else {
         // Создание нового напоминания
         const newReminder = new Reminder(comment, datetime, frequency, disableTime);
-        // reminders.push(newReminder); - turned off
-
-        //adding a notification to Firebase
-        const remindersRef = ref(database, 'reminders');
-
-        function addReminder(newReminder) {
-        push(remindersRef, newReminder)
-            .then(() => console.log("Напоминание добавлено."))
-            .catch((error) => console.error("Ошибка добавления:", error));
-        }
-        
+    
+        // Отправка команды на добавление напоминания в Firebase
         addReminder(newReminder);
-
-
-        // Запускаем его срабатывание
-        scheduleReminder(newReminder);
     }
 
-    updateReminderList(); // Обновляем список
+    // Очистка полей формы
+    // clearPopupFields();
+
     popup.classList.add("hidden"); // Закрываем попап
 });
 
@@ -142,88 +153,130 @@ saveReminderBtn.addEventListener("click", () => {
 
 // Schedule reminders
 function scheduleReminder(reminder) {
+    if (reminder.disableTime && reminder.disableTime <= new Date()) {
+      // Если время выключения наступило, удаляем напоминание из Firebase
+      deleteReminder(reminder.id);
+      return;
+    }
+  
     const now = new Date();
-
-    // Если время напоминания уже прошло, пропускаем его
-    const timeDiff = reminder.datetime - now;
-    if (timeDiff <= 0) {
-        reminder.datetime = new Date(now.getTime() + reminder.frequency * 60000);
+    let nextReminderTime = reminder.datetime;
+  
+    while (nextReminderTime <= now) {
+      nextReminderTime = new Date(nextReminderTime.getTime() + reminder.frequency * 60000);
     }
-
-    // Проверка времени выключения, если оно задано
-    if (reminder.disableTime && now >= reminder.disableTime) {
-        removeReminder(reminder);
-        return;
-    }
-
-    // Устанавливаем таймер
+  
+    const timeDiff = nextReminderTime - now;
+  
     reminder.timeoutId = setTimeout(() => {
-        // Отображаем уведомление
-        showNotification(reminder.comment);
-
-        // Проверяем, нужно ли остановить напоминание
-        if (reminder.disableTime && new Date() >= reminder.disableTime) {
-            removeReminder(reminder);
-            return;
-        }
-
-        // Устанавливаем новое время напоминания
-        reminder.datetime = new Date(
-            reminder.datetime.getTime() + reminder.frequency * 60000
-        );
-
-        // Перезапускаем напоминание
-        scheduleReminder(reminder);
-        updateReminderInDOM(reminder);
+        showNotification(message)
+        scheduleReminder(reminder); // Запланировать следующее напоминание
     }, timeDiff);
-}
+  
+    updateReminderInDOM(reminder);
+  }
 
 // Измененная функция удаления напоминания
 function removeReminder(reminder) {
-    const index = reminders.indexOf(reminder);
-    if (index !== -1) {
-        clearReminderTimers(reminder); // Очищаем таймер
-        reminders.splice(index, 1); // Удаляем из массива
-        updateReminderList(); // Обновляем список
-    }
+    deleteReminder(reminder.id);
 }
 
 
 // Функция обновления элемента списка напоминаний
 function updateReminderInDOM(reminder) {
-    const index = reminders.indexOf(reminder);
-    if (index !== -1) {
-        const listItem = reminderList.children[index];
-
-        const now = new Date();
-        const timeDiff = reminder.datetime - now;
-        const timeLeft = formatTimeLeft(timeDiff);
-
-        // Обновляем содержимое элемента списка
-        listItem.innerHTML = `
-            <div class="reminder-details">
-                <div class="comment">${reminder.comment}</div>
-                <div class="time">Next reminder: ${reminder.datetime.toLocaleString()}</div>
-                <div class="time-left">Time left: ${timeLeft}</div>
-                ${
-                    reminder.disableTime
-                        ? `<div class="disable-time">Disable at: ${reminder.disableTime.toLocaleString()}</div>`
-                        : ""
-                }
-            </div>
-            <button class="edit-btn" data-index="${index}">Edit</button>
-            <button class="delete-btn" data-index="${index}">Delete</button>
-        `;
-
-        // Добавляем обработчики кнопок
-        listItem.querySelector(".edit-btn").addEventListener("click", () => {
-            editReminder(reminder);
-        });
-        listItem.querySelector(".delete-btn").addEventListener("click", () => {
-            removeReminder(reminder);
-        });
+    const reminderElement = document.getElementById(reminder.id);
+  
+    if (reminderElement) {
+      // Обновляем существующий элемент напоминания
+      const commentDiv = reminderElement.querySelector('.comment');
+      const timeDiv = reminderElement.querySelector('.time');
+      const timeLeftDiv = reminderElement.querySelector('.time-left');
+      const disableTimeDiv = reminderElement.querySelector('.disable-time'); 
+      const editBtn = reminderElement.querySelector('.edit-btn');
+      const deleteBtn = reminderElement.querySelector('.delete-btn');
+  
+      commentDiv.textContent = reminder.comment;
+      timeDiv.textContent = `Next reminder: ${reminder.datetime.toLocaleString()}`; 
+  
+      const now = new Date();
+      let nextReminderTime = reminder.datetime;
+      while (nextReminderTime <= now) {
+        nextReminderTime = new Date(nextReminderTime.getTime() + reminder.frequency * 60000);
+      }
+      const timeDiff = nextReminderTime - now;
+      timeLeftDiv.textContent = `Time left: ${formatTimeLeft(timeDiff)}`;
+  
+      // Обновляем время выключения, если оно задано
+      if (reminder.disableTime) {
+        disableTimeDiv.textContent = `Disable at: ${reminder.disableTime.toLocaleString()}`;
+      } else {
+        // Если время выключения не задано, можно либо скрыть элемент, либо установить пустой текст
+        disableTimeDiv.textContent = ""; // Или disableTimeDiv.style.display = "none"; 
+      }
+  
+      editBtn.onclick = () => editReminder(reminder);
+      deleteBtn.onclick = () => removeReminder(reminder);
+  
+    } else {
+      // Создаем новый элемент напоминания
+      const li = document.createElement("li");
+      li.id = reminder.id;
+  
+      li.innerHTML = `
+        <div class="reminder-details">
+          <div class="comment">${reminder.comment}</div>
+          <div class="time">Next reminder: ${reminder.datetime.toLocaleString()}</div> 
+          <div class="time-left">Time left: ${formatTimeLeft(timeDiff)}</div>
+          ${reminder.disableTime ? `<div class="disable-time">Disable at: ${reminder.disableTime.toLocaleString()}</div>` : ''} 
+        </div>
+        <button class="edit-btn" data-index="${reminder.id}">Edit</button> 
+        <button class="delete-btn" data-index="${reminder.id}">Delete</button> 
+      `;
+  
+      reminderList.appendChild(li);
+  
+      // Добавляем обработчики для кнопок после добавления элемента в DOM
+      li.querySelector(".edit-btn").addEventListener("click", () => {
+        editReminder(reminder);
+      });
+      li.querySelector(".delete-btn").addEventListener("click", () => {
+        removeReminder(reminder);
+      });
     }
-}
+  }
+
+// Функция для получения всех напоминаний из Firebase
+function getAllReminders() {
+    const remindersRef = ref(database, 'reminders');
+    onValue(remindersRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const reminders = [];
+        for (let id in data) {
+          const reminderData = data[id];
+          // Преобразование дат из строки в объект Date
+          reminderData.datetime = new Date(reminderData.datetime);
+          reminderData.disableTime = reminderData.disableTime ? new Date(reminderData.disableTime) : null;
+  
+          // Добавляем id к данным напоминания
+          const reminder = new Reminder(reminderData.comment, reminderData.datetime, reminderData.frequency, reminderData.disableTime);
+          reminder.id = id;
+          reminders.push(reminder);
+  
+          // Запланировать напоминание
+          scheduleReminder(reminder);
+        }
+        // Обновляем список напоминаний на странице
+        updateReminderList(reminders);
+      } else {
+        // Если данных нет, очищаем список напоминаний
+        updateReminderList([]);
+      }
+    });
+  }
+  
+  // Вызываем функцию для получения всех напоминаний при загрузке страницы
+  getAllReminders();
 
 
 // Show Windows notification
