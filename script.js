@@ -169,7 +169,7 @@ function scheduleReminder(reminder) {
     const timeDiff = nextReminderTime - now;
   
     reminder.timeoutId = setTimeout(() => {
-        showNotification(message)
+        showNotification(reminder.comment);
         scheduleReminder(reminder); // Запланировать следующее напоминание
     }, timeDiff);
   
