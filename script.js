@@ -161,32 +161,26 @@ saveReminderBtn.addEventListener("click", () => {
 
 // Schedule reminders
 function scheduleReminder(reminder) {
-    if (reminder.disableTime && reminder.disableTime <= new Date()) {
-      // Если время выключения наступило, удаляем напоминание из Firebase
-      deleteReminder(reminder.id);
-      return;
-    }
-  
-    const now = new Date();
-    let nextReminderTime = reminder.datetime;
-  
-    while (nextReminderTime <= now) {
-      nextReminderTime.setTime(nextReminderTime.getTime() + reminder.frequency * 60000);
-    }
-  
-    const timeDiff = nextReminderTime - now;
-  
-    reminder.timeoutId = setTimeout(() => {
-        showNotification(reminder.comment);
-        scheduleReminder(reminder); // Запланировать следующее напоминание
-    }, timeDiff);
-  
-    updateReminderInDOM(reminder);
+  if (reminder.disableTime && reminder.disableTime <= new Date()) {
+    // Если время выключения наступило, удаляем напоминание из Firebase
+    deleteReminder(reminder.id);
+    return;
   }
 
-// Измененная функция удаления напоминания
-function removeReminder(reminder) {
-    deleteReminder(reminder.id);
+  const now = new Date();
+  let nextReminderTime = new Date(reminder.datetime); // Создаем копию reminder.datetime
+
+  // Изменение условия цикла while
+  while (nextReminderTime <= now) {
+    nextReminderTime.setTime(nextReminderTime.getTime() + reminder.frequency * 60000);
+  }
+
+  const timeDiff = nextReminderTime - now;
+  reminder.timeoutId = setTimeout(() => {
+      showNotification(reminder.comment);
+      scheduleReminder(reminder); // Запланировать следующее напоминание
+  }, timeDiff);
+  updateReminderInDOM(reminder);
 }
 
 
