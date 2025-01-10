@@ -171,7 +171,7 @@ function scheduleReminder(reminder) {
     let nextReminderTime = reminder.datetime;
   
     while (nextReminderTime <= now) {
-      nextReminderTime = new Date(nextReminderTime.getTime() + reminder.frequency * 60000);
+      nextReminderTime.setTime(nextReminderTime.getTime() + reminder.frequency * 60000);
     }
   
     const timeDiff = nextReminderTime - now;
@@ -194,6 +194,13 @@ function removeReminder(reminder) {
 function updateReminderInDOM(reminder) {
     const reminderElement = document.getElementById(reminder.id);
   
+    const now = new Date();
+    let nextReminderTime = new Date(reminder.datetime);
+    while (nextReminderTime <= now) {
+        nextReminderTime.setTime(nextReminderTime.getTime() + reminder.frequency * 60000);
+    }
+    const timeDiff = nextReminderTime - now;
+
     if (reminderElement) {
       // Обновляем существующий элемент напоминания
       const commentDiv = reminderElement.querySelector('.comment');
@@ -206,12 +213,6 @@ function updateReminderInDOM(reminder) {
       commentDiv.textContent = reminder.comment;
       timeDiv.textContent = `Next reminder: ${reminder.datetime.toLocaleString()}`; 
   
-      const now = new Date();
-      let nextReminderTime = reminder.datetime;
-      while (nextReminderTime <= now) {
-        nextReminderTime = new Date(nextReminderTime.getTime() + reminder.frequency * 60000);
-      }
-      const timeDiff = nextReminderTime - now;
       timeLeftDiv.textContent = `Time left: ${formatTimeLeft(timeDiff)}`;
   
       // Обновляем время выключения, если оно задано
